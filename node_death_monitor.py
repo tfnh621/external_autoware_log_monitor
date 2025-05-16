@@ -9,6 +9,9 @@ from tts import play_speech
 
 async def node_death_monitor(path: str):
     async for line in follow(path):
+        if 'user interrupted with ctrl-c (SIGINT)' in line:
+            break
+
         if 'process has died' not in line:
             continue
 
