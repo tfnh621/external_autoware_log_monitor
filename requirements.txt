@@ -1,0 +1,4 @@
+aiofiles~=24.1.0
+aiohttp~=3.11.18
+just-playback~=0.1.8
+watchfiles~=1.0.5
