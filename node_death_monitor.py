@@ -1,5 +1,6 @@
 import logging
 from asyncio import sleep
+from pathlib import Path
 
 from just_playback import Playback
 
@@ -24,7 +25,7 @@ async def node_death_monitor(path: str):
             await play_speech(f'{node_name} が異常終了しました')
         except Exception as e:
             logging.error(e)
-            playback = Playback(f'node_died.mp3')
+            playback = Playback(str(Path(__file__).resolve().parent / 'node_died.mp3'))
             playback.play()
             while playback.active:
                 await sleep(0.01)
