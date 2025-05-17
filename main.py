@@ -6,7 +6,7 @@ from typing import AsyncGenerator, Sequence, Optional, Callable
 from watchfiles import awatch, DefaultFilter, Change
 
 from file_util import follow
-from node_death_monitor import node_death_monitor
+from node_death_monitor.node_death_monitor import node_death_monitor
 
 
 class FirstSeenFileFilter(DefaultFilter):
