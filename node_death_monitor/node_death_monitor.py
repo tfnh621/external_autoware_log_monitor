@@ -33,11 +33,9 @@ async def node_death_monitor(path: str):
             logger.debug(f'node ignored: {node_name}')
             continue
 
-        logger.debug(f'{node_name} is dead')
-
-        node_name = node_name.replace('_', ' ')
         try:
-            await play_speech(f'{node_name} が異常終了しました')
+            logger.debug(f'{node_name} is dead')
+            await play_speech(f'{node_name.replace("_", " ")} が異常終了しました')
         except Exception as e:
             logger.exception(e)
             playback = Playback(str(Path(__file__).resolve().parent / 'node_died.mp3'))
