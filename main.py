@@ -79,6 +79,7 @@ if __name__ == '__main__':
 
     if is_debugger_attached():
         logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
         asyncio.run(main(), debug=True)
     else:
         asyncio.run(main())
