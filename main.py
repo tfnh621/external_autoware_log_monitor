@@ -1,5 +1,5 @@
-import asyncio
 import logging
+from asyncio import Task, run, wait_for, TimeoutError, create_task, Queue
 from pathlib import Path
 from typing import AsyncGenerator, Sequence, Optional, Callable
 
@@ -46,29 +46,29 @@ async def wait_for_autoware_launch_log() -> AsyncGenerator[str, None]:
 
     async def worker(file_path: str, timeout_sec: float = 60.0):
         try:
-            if await asyncio.wait_for(check_is_file_autoware_launch_log(file_path), timeout=timeout_sec):
+            if await wait_for(check_is_file_autoware_launch_log(file_path), timeout=timeout_sec):
                 await queue.put(file_path)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
 
     async def producer(watch_path: Path | str, watch_filter: Optional[Callable[[Change, str], bool]]):
         async for changes in awatch(watch_path, watch_filter=watch_filter):
             for change, path in changes:
-                asyncio.create_task(worker(path))
+                create_task(worker(path))
 
-    queue: asyncio.Queue[str] = asyncio.Queue()
-    asyncio.create_task(producer(Path('~/.ros/log/').expanduser(), FirstSeenFileFilter(match_filenames=['launch.log', ])))
+    queue: Queue[str] = Queue()
+    create_task(producer(Path('~/.ros/log/').expanduser(), FirstSeenFileFilter(match_filenames=['launch.log', ])))
     while True:
         yield await queue.get()
 
 
 async def main():
-    current_tasks: list[asyncio.Task] = []
+    current_tasks: list[Task] = []
     async for path in wait_for_autoware_launch_log():
         for task in current_tasks:
             task.cancel()
 
-        current_tasks.append(asyncio.create_task(node_death_monitor(path)))
+        current_tasks.append(create_task(node_death_monitor(path)))
 
 
 if __name__ == '__main__':
@@ -80,6 +80,6 @@ if __name__ == '__main__':
     if is_debugger_attached():
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger().setLevel(logging.DEBUG)
-        asyncio.run(main(), debug=True)
+        run(main(), debug=True)
     else:
-        asyncio.run(main())
+        run(main())
